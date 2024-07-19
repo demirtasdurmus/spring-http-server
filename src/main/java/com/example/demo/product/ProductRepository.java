@@ -2,6 +2,7 @@ package com.example.demo.product;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Iterator;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -46,5 +47,19 @@ public class ProductRepository {
 
     product.setName(name);
     return product;
+  }
+
+  public void deleteProduct(int id) {
+    Iterator<Product> iterator = products.iterator();
+
+    while (iterator.hasNext()) {
+      Product product = iterator.next();
+      if (product.getId() == id) {
+        iterator.remove();
+        return;
+      }
+    }
+
+    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
   }
 }
