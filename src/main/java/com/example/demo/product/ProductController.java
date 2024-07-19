@@ -16,6 +16,12 @@ public class ProductController {
     return new ResponseEntity<>(productRepo.getProducts(), HttpStatus.OK);
   }
 
+  @GetMapping("/{id}")
+  public ResponseEntity<Product> getProductById(@PathVariable int id) {
+    Product product = productRepo.getProductById(id);
+    return new ResponseEntity<>(product, HttpStatus.OK);
+  }
+
   @PostMapping
   public ResponseEntity<Product> addProduct(@RequestBody ProductRequest productRequest) {
     Product newProduct = productRepo.addProduct(productRequest.getName());

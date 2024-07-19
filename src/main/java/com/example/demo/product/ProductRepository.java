@@ -18,6 +18,13 @@ public class ProductRepository {
     return products;
   }
 
+  public Product getProductById(int id) {
+    return products.stream()
+        .filter(product -> product.getId() == id)
+        .findFirst()
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+  }
+
   public Product addProduct(String name) {
     Optional<Product> existingProduct = products.stream()
         .filter(product -> product.getName().equalsIgnoreCase(name))
