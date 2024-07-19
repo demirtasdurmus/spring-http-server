@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/products")
 public class ProductController {
-  private final ProductRepository productRepo = new ProductRepository(new ArrayList<>());
+  private final ProductRepository productRepo = new ProductRepository();
 
   @GetMapping
   public ResponseEntity<ArrayList<Product>> getProducts() {

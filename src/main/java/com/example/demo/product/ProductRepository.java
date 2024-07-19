@@ -9,11 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 public class ProductRepository {
   int lastId = 1;
-  private ArrayList<Product> products;
-
-  public ProductRepository(ArrayList<Product> products) {
-    this.products = products;
-  }
+  private ArrayList<Product> products = new ArrayList<>();
 
   public ArrayList<Product> getProducts() {
     return products;
