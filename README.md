@@ -17,5 +17,22 @@ If you manually switch to a different parent and actually want the inheritance, 
 
 ## Starting up the project
 
-- Ensure you have `maven` installed and added to your `PATH` variable.
-- Run `mvn spring-boot:run` to spin up the server.
+- Ensure you have `maven` installed and added to your `PATH` variable. If you don't have it you install it via homebrew.
+
+```bash
+brew install maven
+```
+
+- Run the following command spin up the server.
+
+```bash
+mvn spring-boot:run
+```
+
+With this command dev tools is activated by default and you can take advantage of hot reloading.
+
+- If you want to disable it run the application by first setting an env variable `DISABLE_DEVTOOLS`.
+
+```bash
+DISABLE_DEVTOOLS=true mvn spring-boot:run
+```
