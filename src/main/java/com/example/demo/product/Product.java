@@ -1,13 +1,12 @@
 package com.example.demo.product;
 
 public class Product {
-  private int last_id = 1;
   private int id;
   private String name;
 
-  public Product(String name) {
+  public Product(int id, String name) {
     this.name = name;
-    this.id = last_id++;
+    this.id = id;
   }
 
   public int getId() {
@@ -17,5 +16,4 @@ public class Product {
   public String getName() {
     return name;
   }
-
 }
