@@ -40,4 +40,11 @@ public class ProductRepository {
     products.add(newProduct);
     return newProduct;
   }
+
+  public Product updateProduct(int id, String name) {
+    Product product = getProductById(id);
+
+    product.setName(name);
+    return product;
+  }
 }

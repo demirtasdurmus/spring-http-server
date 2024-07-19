@@ -28,4 +28,10 @@ public class ProductController {
     return new ResponseEntity<>(newProduct, HttpStatus.CREATED);
   }
 
+  @PatchMapping("/{id}")
+  public ResponseEntity<Product> updateProduct(@PathVariable int id, @RequestBody ProductRequest productRequest) {
+    Product updatedProduct = productRepo.updateProduct(id, productRequest.getName());
+    return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
+  }
+
 }
