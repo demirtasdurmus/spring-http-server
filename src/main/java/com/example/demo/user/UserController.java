@@ -1,6 +1,10 @@
 package com.example.demo.user;
 
-import java.util.ArrayList;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
+import java.util.Optional;
+
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -15,16 +19,24 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-  private final UserRepository userRepo = new UserRepository();
+
+  @Autowired
+  private UserRepository userRepo;
 
   @GetMapping
-  public ResponseEntity<ArrayList<User>> getUsers() {
-    return new ResponseEntity<>(userRepo.getUsers(), HttpStatus.OK);
+  public ResponseEntity<List<User>> getUsers() {
+    return new ResponseEntity<>(userRepo.findAll(), HttpStatus.OK);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<User> getUserById(@PathVariable int id) {
-    return new ResponseEntity<>(userRepo.getUserById(id), HttpStatus.OK);
+  public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    Optional<User> foundUser = userRepo.findById(id);
+
+    if (foundUser.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID: " + id + " not found");
+    }
+
+    return new ResponseEntity<>(foundUser.get(), HttpStatus.CREATED);
   }
 
   @PostMapping
@@ -36,15 +48,24 @@ public class UserController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
     }
 
-    // Create the new user and send the response
-    User newUser = userRepo.addUser(userCreateDto.getEmail(), userCreateDto.getFirstName(),
-        userCreateDto.getFirstName());
+    // Check if the user with this email already exists
+    if (userRepo.findByEmail(userCreateDto.getEmail()) != null) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "User with this email already exists");
+    }
 
-    return new ResponseEntity<User>(newUser, HttpStatus.CREATED);
+    // Create the new user and send the response
+    User newUser = new User();
+    newUser.setEmail(userCreateDto.getEmail());
+    newUser.setFirstName(userCreateDto.getFirstName());
+    newUser.setLastName(userCreateDto.getLastName());
+    newUser.setRole(Role.USER); // Default role
+    User savedUser = userRepo.save(newUser);
+
+    return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{id}")
-  public ResponseEntity<User> updateUser(@PathVariable int id, @Valid @RequestBody UserUpdateDto userUpdateRequest,
+  public ResponseEntity<User> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateDto userUpdateDto,
       BindingResult bindingResult) {
     // Check if there are validation errors
     if (bindingResult.hasErrors()) {
@@ -52,18 +73,42 @@ public class UserController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
     }
 
+    // Check if the user with this id exists
+    Optional<User> existingUser = userRepo.findById(id);
+    if (existingUser.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID: " + id + " not found");
+    }
+
     // Update the user and send the response
-    User updatedUser = userRepo.updateUser(id, userUpdateRequest.getFirstName(), userUpdateRequest.getLastName(),
-        userUpdateRequest.getRole());
+    User user = existingUser.get();
+
+    if (userUpdateDto.getFirstName() != null) {
+      user.setFirstName(userUpdateDto.getFirstName());
+    }
+
+    if (userUpdateDto.getLastName() != null) {
+      user.setLastName(userUpdateDto.getLastName());
+    }
+    if (userUpdateDto.getRole() != null) {
+      user.setRole(userUpdateDto.getRole());
+    }
+
+    User updatedUser = userRepo.save(user);
 
     return new ResponseEntity<>(updatedUser, HttpStatus.OK);
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteUser(@PathVariable int id) {
-    userRepo.deleteUser(id);
+  public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    // Check if the user with this id exists
+    Optional<User> existingUser = userRepo.findById(id);
+    if (existingUser.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID: " + id + " not found");
+    }
+
+    // Delete user and send responase
+    userRepo.delete(existingUser.get());
 
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
-
 }

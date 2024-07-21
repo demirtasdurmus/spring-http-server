@@ -1,30 +1,37 @@
 package com.example.demo.user;
 
+import jakarta.persistence.*;
+
 enum Role {
   USER, ADMIN
 };
 
+@Entity
+@Table(name = "users")
 public class User {
-  private int id;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @Column(nullable = false, unique = true)
   private String email;
+
+  @Column(nullable = false)
   private String firstName;
+
+  @Column(nullable = false)
   private String lastName;
+
+  @Enumerated(EnumType.STRING)
   private Role role;
 
-  public User(int id, String email, String firstName, String lastName) {
-    this(id, email, firstName, lastName, Role.USER);
-  }
-
-  public User(int id, String email, String firstName, String lastName, Role role) {
-    this.id = id;
-    this.email = email;
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.role = role;
-  }
-
-  public int getId() {
+  public Long getId() {
     return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
   }
 
   public String getEmail() {
