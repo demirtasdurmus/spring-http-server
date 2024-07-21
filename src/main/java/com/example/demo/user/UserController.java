@@ -1,20 +1,16 @@
 package com.example.demo.user;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.example.demo.utils.ValidationErrorUtils;
+
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/users")
@@ -22,43 +18,52 @@ public class UserController {
   private final UserRepository userRepo = new UserRepository();
 
   @GetMapping
-  public ArrayList<User> getUsers() {
-    return userRepo.getUsers();
+  public ResponseEntity<ArrayList<User>> getUsers() {
+    return new ResponseEntity<>(userRepo.getUsers(), HttpStatus.OK);
   }
 
   @GetMapping("/{id}")
-  public User getUserById(@PathVariable int id) {
-    return userRepo.getUserById(id);
+  public ResponseEntity<User> getUserById(@PathVariable int id) {
+    return new ResponseEntity<>(userRepo.getUserById(id), HttpStatus.OK);
   }
 
   @PostMapping
-  public User addUser(@Valid @RequestBody UserCreateRequest userCreateRequest, BindingResult bindingResult) {
+  public ResponseEntity<User> addUser(@Valid @RequestBody UserCreateDto userCreateDto,
+      BindingResult bindingResult) {
     // Check if there are validation errors
     if (bindingResult.hasErrors()) {
-      String errorMessage = bindingResult.getFieldErrors()
-          .stream()
-          .map(error -> error.getDefaultMessage())
-          .collect(Collectors.joining(", "));
-
+      String errorMessage = ValidationErrorUtils.getErrorMessages(bindingResult);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
     }
 
-    User newUser = userRepo.addUser(userCreateRequest.getEmail(), userCreateRequest.getFirstName(),
-        userCreateRequest.getFirstName());
-    return newUser;
+    // Create the new user and send the response
+    User newUser = userRepo.addUser(userCreateDto.getEmail(), userCreateDto.getFirstName(),
+        userCreateDto.getFirstName());
+
+    return new ResponseEntity<User>(newUser, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{id}")
-  public User updateUser(@PathVariable int id, @RequestBody UserUpdateRequest userUpdateRequest) {
+  public ResponseEntity<User> updateUser(@PathVariable int id, @Valid @RequestBody UserUpdateDto userUpdateRequest,
+      BindingResult bindingResult) {
+    // Check if there are validation errors
+    if (bindingResult.hasErrors()) {
+      String errorMessage = ValidationErrorUtils.getErrorMessages(bindingResult);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
+    }
+
+    // Update the user and send the response
     User updatedUser = userRepo.updateUser(id, userUpdateRequest.getFirstName(), userUpdateRequest.getLastName(),
         userUpdateRequest.getRole());
-    return updatedUser;
+
+    return new ResponseEntity<>(updatedUser, HttpStatus.OK);
   }
 
   @DeleteMapping("/{id}")
-  public void deleteUser(@PathVariable int id) {
+  public ResponseEntity<Void> deleteUser(@PathVariable int id) {
     userRepo.deleteUser(id);
-    return;
+
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
 }

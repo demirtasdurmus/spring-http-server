@@ -1,32 +1,25 @@
 package com.example.demo.user;
 
-public class UserUpdateRequest {
+import jakarta.validation.constraints.NotBlank;
+
+public class UserUpdateDto {
+  @NotBlank(message = "First name is mandatory")
   private String firstName;
+
+  @NotBlank(message = "Last name is mandatory")
   private String lastName;
+
   private Role role;
 
   public String getFirstName() {
     return firstName;
   }
 
-  public void setFirstName(String firstName) {
-    this.firstName = firstName;
-  }
-
   public String getLastName() {
     return lastName;
-  }
-
-  public void setLastName(String lastName) {
-    this.lastName = lastName;
   }
 
   public Role getRole() {
     return role;
   }
-
-  public void setRole(Role role) {
-    this.role = role;
-  }
-
 }
